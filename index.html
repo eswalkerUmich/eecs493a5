@@ -37,7 +37,7 @@
 
             <div class="col-lg-12 col-md-12 col-sm-12">
                <div>
-                  <button class="btn btn-success" @click="getAllArtists">ALL</button>
+                  <button v-if="artists.length > 0" class="btn btn-success" @click="getAllArtists">ALL</button>
                   <button v-for="genre in genres" :key="genre" class="btn"
                      :class="{ 'btn-info': selectedGenres.includes(genre), 'btn-outline-info': !selectedGenres.includes(genre) }"
                      @click="toggleGenre(genre)">{{ genre }}</button>
@@ -48,9 +48,25 @@
                <h4>
                   List of results
                </h4>
+               <div class="col-lg-12">
+                  <div class="dropdown">
+                     <button class="btn dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Sort list of results by:
+                     </button>
+                     <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                        <li><a class="dropdown-item" href="#" @click="sortResults('original')"
+                              :class="{ 'active': sortOption === 'original' }">Reset to original</a></li>
+                        <li><a class="dropdown-item" href="#" @click="sortResults('collectionName')"
+                              :class="{ 'active': sortOption === 'collectionName' }">Collection Name</a></li>
+                        <li><a class="dropdown-item" href="#" @click="sortResults('price')"
+                              :class="{ 'active': sortOption === 'price' }">Price</a></li>
+                     </ul>
+                  </div>
+               </div>
             </div>
 
-            <div v-if="filteredArtists.length > 0" v-for="(artist, index) in filteredArtists" :key="index"
+            <div v-if="sortedArtists.length > 0" v-for="(artist, index) in sortedArtists" :key="index"
                class='col-lg-6 col-md-6 col-sm-6 artist'>
                <div class="row">
                   <div class='artist-albumcover col-sm-4'>

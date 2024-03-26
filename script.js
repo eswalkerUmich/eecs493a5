@@ -6,17 +6,28 @@ createApp({
       searchQuery: '',
       artists: [],
       genres: [],
-      selectedGenres: []
+      selectedGenres: [],
+      sortOption: 'original'
     }
   },
   computed: {
     filteredArtists() {
       if (this.selectedGenres.length === 0) {
-        return this.artists;
+        return this.artists.filter(artist => artist.artistName.toLowerCase().includes(this.searchQuery.toLowerCase()));
       } else {
         return this.artists.filter(artist => {
-          return this.selectedGenres.some(genre => artist.genre.includes(genre));
+          const artistGenres = artist.primaryGenreName.split(',');
+          return artistGenres.some(genre => this.selectedGenres.includes(genre)) && artist.artistName.toLowerCase().includes(this.searchQuery.toLowerCase());
         });
+      }
+    },
+    sortedArtists() {
+      if (this.sortOption === 'original') {
+        return this.filteredArtists;
+      } else if (this.sortOption === 'collectionName') {
+        return this.filteredArtists.slice().sort((a, b) => a.collectionName.localeCompare(b.collectionName));
+      } else if (this.sortOption === 'price') {
+        return this.filteredArtists.slice().sort((a, b) => a.trackPrice - b.trackPrice);
       }
     }
   },
@@ -33,6 +44,7 @@ createApp({
         .then(response => {
           console.log(response.data);
           this.artists = response.data.results;
+          this.updateGenres();
           if (this.artists.length === 0) {
             alert(`Total ${this.artists.length} artists found.`);
           }
@@ -49,6 +61,7 @@ createApp({
         .then(response => {
           console.log(response.data);
           this.artists = response.data.results;
+          this.updateGenres();
           alert(`Total ${this.artists.length} artists found.`);
         })
         .catch(error => {
@@ -56,13 +69,27 @@ createApp({
           alert('An error occurred while fetching artists. Please try again.');
         });
     },
+    updateGenres() {
+      const allGenres = this.artists.flatMap(artist => artist.primaryGenreName.split(','));
+      this.genres = [...new Set(allGenres)];
+    },
     toggleGenre(genre) {
-      if (this.selectedGenres.includes(genre)) {
-        const index = this.selectedGenres.indexOf(genre);
-        this.selectedGenres.splice(index, 1);
+      if (genre === 'ALL') {
+        this.selectedGenres = [];
       } else {
-        this.selectedGenres.push(genre);
+        const index = this.selectedGenres.indexOf(genre);
+        if (index === -1) {
+          this.selectedGenres.push(genre);
+        } else {
+          this.selectedGenres.splice(index, 1);
+        }
       }
+    },
+    isSelectedGenre(genre) {
+      return genre === 'ALL' ? this.selectedGenres.length === 0 : this.selectedGenres.includes(genre);
+    },
+    sortResults(option) {
+      this.sortOption = option;
     }
   }
 }).mount('#app');
