@@ -11,23 +11,13 @@ createApp({
     }
   },
   computed: {
-    filteredArtists() {
-      if (this.selectedGenres.length === 0) {
-        return this.artists.filter(artist => artist.artistName.toLowerCase().includes(this.searchQuery.toLowerCase()));
-      } else {
-        return this.artists.filter(artist => {
-          const artistGenres = artist.primaryGenreName.split(',');
-          return artistGenres.some(genre => this.selectedGenres.includes(genre)) && artist.artistName.toLowerCase().includes(this.searchQuery.toLowerCase());
-        });
-      }
-    },
     sortedArtists() {
       if (this.sortOption === 'original') {
-        return this.filteredArtists;
+        return this.artists;
       } else if (this.sortOption === 'collectionName') {
-        return this.filteredArtists.slice().sort((a, b) => a.collectionName.localeCompare(b.collectionName));
+        return this.artists.slice().sort((a, b) => a.collectionName.localeCompare(b.collectionName));
       } else if (this.sortOption === 'price') {
-        return this.filteredArtists.slice().sort((a, b) => a.trackPrice - b.trackPrice);
+        return this.artists.slice().sort((a, b) => a.trackPrice - b.trackPrice);
       }
     }
   },
