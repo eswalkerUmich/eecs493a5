@@ -46,7 +46,6 @@ createApp({
         });
     },
     getAllArtists() {
-      const url = 'https://itunes.apple.com/search?term=&entity=musicTrack&limit=50';
       this.selectedGenres = [];
       this.searchArtists();
     },
@@ -68,7 +67,7 @@ createApp({
         } else {
           this.selectedGenres.splice(index, 1);
           if (this.selectedGenres.length === 0) {
-            this.selectedGenres = []; // Deselect all genres
+            this.selectedGenres = [];
           }
         }
       }
