@@ -38,12 +38,13 @@ createApp({
         return;
       }
 
-      const url = `https://itunes.apple.com/search?term=${this.searchQuery}&entity=musicTrack&limit=50`;
+      const encodedQuery = encodeURIComponent(this.searchQuery.trim());
+      const url = `https://itunes.apple.com/search?term=${encodedQuery}&entity=musicTrack&limit=50`;
 
       axios.get(url)
         .then(response => {
           console.log(response.data);
-          this.artists = response.data.results;
+          this.artists = response.data.results.filter(artist => artist.artistName.toLowerCase().includes(this.searchQuery.toLowerCase()));
           this.updateGenres();
           if (this.artists.length === 0) {
             alert(`Total ${this.artists.length} artists found.`);
@@ -56,22 +57,16 @@ createApp({
     },
     getAllArtists() {
       const url = 'https://itunes.apple.com/search?term=&entity=musicTrack&limit=50';
-
-      axios.get(url)
-        .then(response => {
-          console.log(response.data);
-          this.artists = response.data.results;
-          this.updateGenres();
-          alert(`Total ${this.artists.length} artists found.`);
-        })
-        .catch(error => {
-          console.error('Error fetching artists:', error);
-          alert('An error occurred while fetching artists. Please try again.');
-        });
+      this.selectedGenres = [];
+      this.searchArtists();
     },
     updateGenres() {
       const allGenres = this.artists.flatMap(artist => artist.primaryGenreName.split(','));
-      this.genres = [...new Set(allGenres)];
+      const uniqueGenres = [...new Set(allGenres)];
+      const genresInResults = uniqueGenres.filter(genre => {
+        return this.artists.some(artist => artist.primaryGenreName.includes(genre));
+      });
+      this.genres = genresInResults;
     },
     toggleGenre(genre) {
       if (genre === 'ALL') {
@@ -82,6 +77,9 @@ createApp({
           this.selectedGenres.push(genre);
         } else {
           this.selectedGenres.splice(index, 1);
+          if (this.selectedGenres.length === 0) {
+            this.selectedGenres = []; // Deselect all genres
+          }
         }
       }
     },
